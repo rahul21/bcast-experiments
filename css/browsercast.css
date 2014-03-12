@@ -5,16 +5,39 @@
 }
 
 #browsercast-audio {
+	margin-left: 300px;
 	width: 100%;
 	margin: auto auto;
 }
 
 #markers {
-	width: 100%;
+	margin-left: 200px;
+	width: 1150px;
 	height: 10px;
 	background-color: #e3e3e3;
 }
 
+.slide {
+	display: block;
+	float: left;
+	
+	padding-top: 1px;
+	margin-bottom: 3px;
+	width: 200px;
+	height: 40px;
+	border-right: solid 1px #000;
+	cursor: pointer;
+	background-color: #f3efe3;
+}
+
+#navs {
+	margin-top: 20px;
+	display: block;
+	width: 250px;
+	height: 500px;
+	overflow-y: scroll;
+	
+}
 .cue {
 	position: relative;
 	float: left;

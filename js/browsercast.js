@@ -88,6 +88,21 @@
         return slideCues;
     }
 
+    function getOnlySlideCues() {
+        var slides, slideCues, cue, cueTime;
+        // Get a list of the slides and their cue times.
+        slides = document.getElementsByTagName('section');
+        slideCues = [];
+        for (i = 0; i < slides.length; i += 1) {
+            if (typeof slides[i].attributes['data-bccue'] !== 'undefined') {
+                cueTime = parseCueTime(slides[i]);
+                cue = new SlideCue(cueTime, i);
+                slideCues.push(cue);
+            }
+        }
+        return slideCues;
+    }
+
     function setCueLength() {
         var markers, markerLength, divs, slideCues, borderWidth;
         slideCues = getSlideCues();
@@ -100,19 +115,38 @@
         };
     }
 
+    function setNavDivLength() {
+        var markers, ul, divs, slideCues, borderWidth, para ,node;
+        slideCues = getOnlySlideCues();
+        markers = document.getElementById('navs');
+
+        borderWidth = 2;
+        
+        divs = document.getElementsByClassName('slide');
+        for (var i = 0; i < divs.length; i++) {
+           
+            para=document.createElement("p");
+            node=document.createTextNode("Slide " +(i+1));
+            para.appendChild(node);
+            divs[i].appendChild(para)
+        };
+    }
+
     function onCueClick(cue, popcorn) {
        popcorn.currentTime(cue.time);
     }
 
     // Use the audio timeupdates to drive existing slides.
     function playBrowserCast() {
-        var audio, slideCues, popcorn, markers, div;
+        var audio, slideCues, onlySlideCues, popcorn, markers, div;
 
         slideCues = getSlideCues();
+        onlySlideCues = getOnlySlideCues();
 
         // Look for the browsercast audio element.
         audio = document.getElementById('browsercast-audio');
         markers = document.getElementById('markers');
+        navs = document.getElementById('navs');
 
         popcorn = Popcorn(audio);
 
@@ -137,6 +171,29 @@
             });
         });
         setCueLength();
+
+         i = 0;
+        onlySlideCues.forEach(function (cue) {
+            ul = document.createElement('ul');
+            ul.className = 'slide';
+            ul.setAttribute('data', "time:"+cue.time);
+            cue.ul = ul;
+            ul.onclick = function(event) {
+                        return onCueClick.call(this, cue, popcorn);
+                    };
+            navs.appendChild(ul);
+
+            popcorn.cue(i++, cue.time, function () {
+                transitionLock = true;
+                cue.focus();
+                var active = document.querySelector(".active");
+                if (active != null) active.classList.remove("active");
+                cue.ul.classList.add("active");
+                transitionLock = false;
+            });
+        });
+        
+        setNavDivLength();
 
         window.onresize = setCueLength;
 
@@ -239,6 +296,7 @@
                 var slides, src, i, start, slideDiv;
                 start = this.getStartTS();
                 slides = document.getElementsByTagName('section');
+                console.log(slides);
                 for (i = 0; i < this.cuePoints.length; i += 1) {
                     slides[i].attributes['data-bccue'].value = (this.cuePoints[i].ts - start)/1000.0;
 
